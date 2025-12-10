@@ -1,0 +1,10 @@
+package com.aug.main.repository;
+
+import com.aug.main.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    boolean existsByEmail(String email);
+
+    User findByEmail(String email);
+}

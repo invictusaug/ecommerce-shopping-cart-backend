@@ -1,0 +1,13 @@
+package com.aug.main;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DreamShopsApplication {
+
+	static void main(String[] args) {
+		SpringApplication.run(DreamShopsApplication.class, args);
+	}
+
+}
