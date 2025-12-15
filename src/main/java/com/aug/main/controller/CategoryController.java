@@ -39,7 +39,7 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("/category/{id}/category")
+    @GetMapping("/category/{id}")
     public ResponseEntity<ApiResponse> getCategoryById(@PathVariable Long id) {
         try {
             Category theCategory = iCategoryService.getCategoryById(id);
@@ -49,7 +49,7 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("category/{name}/category")
+    @GetMapping("category/name/{name}")
     public ResponseEntity<ApiResponse> getCategoryByName(@PathVariable String name) {
         try {
             Category theCategory = iCategoryService.getCategoryByName(name);
