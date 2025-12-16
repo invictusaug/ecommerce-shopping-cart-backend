@@ -1,5 +1,6 @@
 package com.aug.main.controller;
 
+import com.aug.main.dto.CartDto;
 import com.aug.main.exceptions.ResourceNotFoundException;
 import com.aug.main.model.Cart;
 import com.aug.main.response.ApiResponse;
@@ -23,7 +24,8 @@ public class CartController {
     public ResponseEntity<ApiResponse> getCart(@PathVariable Long cartId) {
         try {
             Cart cart = cartService.getCart(cartId);
-            return ResponseEntity.ok(new ApiResponse("success", cart));
+            CartDto dto = cartService.convertToDto(cart);
+            return ResponseEntity.ok(new ApiResponse("success", dto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }

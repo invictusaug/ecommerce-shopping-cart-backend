@@ -1,18 +1,24 @@
 package com.aug.main.service.cart;
 
+import com.aug.main.dto.CartDto;
+import com.aug.main.dto.CartItemDto;
 import com.aug.main.exceptions.ResourceNotFoundException;
 import com.aug.main.model.Cart;
 import com.aug.main.model.CartItem;
 import com.aug.main.model.User;
 import com.aug.main.repository.CartItemRepository;
 import com.aug.main.repository.CartRepository;
+import com.aug.main.service.product.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,8 @@ public class CartService implements ICartService{
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final ProductService productService;
+    private final ModelMapper modelMapper;
     private final AtomicLong cartIdGenerator = new AtomicLong(0);
 
     @Override
@@ -36,7 +44,8 @@ public class CartService implements ICartService{
         Cart cart = getCart(id);
         cartItemRepository.deleteAllByCartId(id);
         cart.getItems().clear();
-        cartRepository.deleteById(id);
+        cart.setTotalAmount(BigDecimal.ZERO);
+        cartRepository.save(cart);
     }
 
     @Override
@@ -62,4 +71,24 @@ public class CartService implements ICartService{
     public Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserId(userId);
     }
+
+    @Override
+    public CartDto convertToDto(Cart cart) {
+        CartDto dto = new CartDto();
+        dto.setId(cart.getId());
+        dto.setTotalAmount(cart.getTotalAmount());
+
+        Set<CartItemDto> itemDtos = cart.getItems().stream().map(item -> {
+            CartItemDto itemDto = new CartItemDto();
+            itemDto.setId(item.getId());
+            itemDto.setQuantity(item.getQuantity());
+            itemDto.setUnitPrice(item.getUnitPrice());
+            itemDto.setProduct(productService.convertToDto(item.getProduct()));
+            return itemDto;
+        }).collect(Collectors.toSet());
+
+        dto.setItems(itemDtos);
+        return dto;
+    }
+
 }

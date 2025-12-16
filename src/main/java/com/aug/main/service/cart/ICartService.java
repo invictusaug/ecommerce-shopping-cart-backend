@@ -1,5 +1,6 @@
 package com.aug.main.service.cart;
 
+import com.aug.main.dto.CartDto;
 import com.aug.main.model.Cart;
 import com.aug.main.model.User;
 
@@ -13,4 +14,6 @@ public interface ICartService {
     Cart initializeNewCart(User user);
 
     Cart getCartByUserId(Long userId);
+
+    CartDto convertToDto(Cart cart);
 }
