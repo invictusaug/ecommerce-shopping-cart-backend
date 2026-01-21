@@ -17,7 +17,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +32,22 @@ public class ProductService implements IProductService{
         if(productExists(request.getName(), request.getBrand() )) {
             throw new AlreadyExistsException(request.getBrand() + " " + request.getName()+ " already exists, you may update this product instead!   ");
         }
-        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
-                .orElseGet(() -> {
-                    Category newCategory = new Category(request.getCategory().getName());
-                    return categoryRepository.save(newCategory);
-                });
+/*
+//        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
+//                .orElseGet(() -> {
+//                    Category newCategory = new Category(request.getCategory().getName());
+//                    return categoryRepository.save(newCategory);
+//                });
+ */
+        Category category;
+        Category reqCategory = request.getCategory();
+        if(reqCategory.getId() != null) {
+            category = categoryRepository.findById(reqCategory.getId()).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + reqCategory.getId()));
+        } else if (reqCategory.getName() != null && !reqCategory.getName().isBlank()) {
+            category = categoryRepository.findByName(reqCategory.getName()).orElseGet(() -> categoryRepository.save(new Category(reqCategory.getName())));
+        } else {
+            throw new IllegalArgumentException("Category id or name must be provided.");
+        }
         request.setCategory(category);
         return productRepository.save(createProduct(request, category));
     }
@@ -88,8 +98,19 @@ public class ProductService implements IProductService{
         existingProduct.setPrice(request.getPrice());
         existingProduct.setInventory(request.getInventory());
         existingProduct.setDescription(request.getDescription());
-        Category category = categoryRepository.findByName(request.getCategory().getName());
-        existingProduct.setCategory(category);
+//        Category category = categoryRepository.findByName(request.getCategory().getName());
+        Category category;
+        Category reqCategory = request.getCategory();
+        if(reqCategory != null) {
+            if(reqCategory.getId() != null) {
+                category = categoryRepository.findById(reqCategory.getId()).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            } else if(reqCategory.getName() != null && !reqCategory.getName().isBlank()) {
+                category = categoryRepository.findByName(reqCategory.getName()).orElseGet(() -> categoryRepository.save(new Category(reqCategory.getName())));
+            } else {
+                throw new IllegalArgumentException("Category id or name must be provided.");
+            }
+            existingProduct.setCategory(category);
+        }
         return existingProduct;
     }
 

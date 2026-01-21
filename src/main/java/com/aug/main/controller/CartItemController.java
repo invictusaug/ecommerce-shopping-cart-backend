@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -31,7 +33,9 @@ public class CartItemController {
             User user = userService.getAuthenticatedUser();
             Cart cart = cartService.initializeNewCart(user);
             cartItemService.addItemToCart(cart.getId(), productId, quantity);
-            return ResponseEntity.ok(new ApiResponse("Add Item success", null));
+            return ResponseEntity.ok(new ApiResponse("Add Item success",  Map.of(
+                    "cartId", cart.getId()
+            )));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         } catch (JwtException e) {
@@ -49,12 +53,12 @@ public class CartItemController {
         }
     }
 
-    @PutMapping("/cart/{cartId}/item/{itemId}/update")
+    @PutMapping("/cart/{cartId}/productId/{productId}/update")
     public ResponseEntity<ApiResponse> updateItemQuantity(@PathVariable Long cartId,
-                                                          @PathVariable Long itemId,
+                                                          @PathVariable Long productId,
                                                           @RequestParam Integer quantity) {
         try {
-            cartItemService.updateItemQuantity(cartId, itemId, quantity);
+            cartItemService.updateItemQuantity(cartId, productId, quantity);
             return ResponseEntity.ok(new ApiResponse("Update Item success", null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));

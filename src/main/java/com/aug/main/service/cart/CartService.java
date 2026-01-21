@@ -10,14 +10,12 @@ import com.aug.main.repository.CartItemRepository;
 import com.aug.main.repository.CartRepository;
 import com.aug.main.service.product.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +25,6 @@ public class CartService implements ICartService{
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
-    private final ModelMapper modelMapper;
-    private final AtomicLong cartIdGenerator = new AtomicLong(0);
 
     @Override
     public Cart getCart(Long id) {
@@ -42,7 +38,6 @@ public class CartService implements ICartService{
     @Override
     public void clearCart(Long id) {
         Cart cart = getCart(id);
-        cartItemRepository.deleteAllByCartId(id);
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
         cartRepository.save(cart);

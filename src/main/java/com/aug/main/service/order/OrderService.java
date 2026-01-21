@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class OrderService implements IOrderService {
         Cart cart = cartService.getCartByUserId(userId);
         Order order = createOrder(cart);
         List<OrderItem> orderItemList = createOrderItems(order, cart);
-        order.setOrderItems(new HashSet<>(orderItemList));
+        order.setOrderItems(new ArrayList<>(orderItemList));
         order.setTotalAmount(calculateTotalPrice(orderItemList));
 
         Order save = orderRepository.save(order);
@@ -75,7 +76,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public OrderDto getOrder(Long orderId) {
-        return orderRepository.findById(orderId)
+        return orderRepository.findOrderWithItems(orderId)
                 .map(this::convertOrderToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found!"));
     }

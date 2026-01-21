@@ -9,6 +9,7 @@ import com.aug.main.repository.CartRepository;
 import com.aug.main.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -52,23 +53,33 @@ public class CartItemService implements ICartItemService {
     }
 
     @Override
+    @Transactional
     public void updateItemQuantity(Long cartId, Long productId, int quantity) {
-        Cart cart = cartService.getCart(cartId);
-        cart.getItems()
-                .stream()
-                .filter(i -> i.getProduct().getId().equals(productId))
-                .findFirst()
-                .ifPresent(item -> {
-                    item.setQuantity(quantity);
-                    item.setUnitPrice(item.getProduct().getPrice());
-                    item.setTotalPrice();
-                });
+        CartItem cartItem = cartItemRepository.findByCartIdAndProductId(cartId, productId).orElseThrow(() -> new ResourceNotFoundException("Cart item with"));
+        if (!cartItem.getCart().getId().equals(cartId)) {
+            throw new IllegalStateException("Item does not belong to this cart");
+        }
+        cartItem.setQuantity(quantity);
+        cartItem.setUnitPrice(cartItem.getProduct().getPrice());
+        cartItem.setTotalPrice();
+        Cart cart = cartItem.getCart();
+//        cart.getItems()
+//                .stream()
+//                .filter(i -> i.getProduct().getId().equals(productId))
+//                .findFirst()
+//                .ifPresent(item -> {
+//                    item.setQuantity(quantity);
+//                    item.setUnitPrice(item.getProduct().getPrice());
+//                    item.setTotalPrice();
+//                    cartItemRepository.save(item);
+//                });
+
         BigDecimal totalAmount = cart.getItems()
                 .stream()
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setTotalAmount(totalAmount);
-        cartRepository.save(cart);
+//        cartRepository.save(cart);
     }
 
     public CartItem getCartItem(Long cartId,  Long productId) {

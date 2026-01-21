@@ -39,7 +39,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{userId}/order")
+    @GetMapping("/user/{userId}/order")
     public ResponseEntity<ApiResponse> getUserOrders(@PathVariable Long userId) {
         try {
             List<OrderDto> order = orderService.getUserOrders(userId);
